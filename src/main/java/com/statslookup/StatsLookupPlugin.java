@@ -2,36 +2,27 @@ package com.statslookup;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
+import javax.swing.*;
 
+import com.statslookup.utils.MonsterNameCleaner;
 import com.statslookup.views.StatsLookupPanel;
 import com.statslookup.utils.Constants;
-import com.statslookup.views.StatsLoopupOverlay;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
+import net.runelite.api.*;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
-import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.util.ImageUtil;
 
 @Slf4j
 @PluginDescriptor(name = "Example")
 public class StatsLookupPlugin extends Plugin {
 	@Inject
 	private Client client;
-
-	@Inject
-	private OverlayManager overlayManager;
-
-	@Inject
-	private StatsLoopupOverlay statsLoopupOverlay;
-
 	@Inject
 	private StatsLookupConfig config;
 	@Inject
@@ -39,6 +30,7 @@ public class StatsLookupPlugin extends Plugin {
 
 	private NavigationButton navButton;
 	private StatsLookupPanel statsLookupPanel;
+	private static final String STATS_OPTION = "Lookup Stats";
 
 	@Override
 	protected void startUp() throws Exception {
@@ -72,8 +64,37 @@ public class StatsLookupPlugin extends Plugin {
 		}
 	}
 
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded event)
+	{
+		if (config.showStatsMenuOption() && event.getType() == MenuAction.NPC_SECOND_OPTION.getId() && event.getTarget() != null)
+		{
+			client.createMenuEntry(client.getMenuEntries().length)
+					.setOption(STATS_OPTION)
+					.setTarget(event.getTarget())
+					.setIdentifier(event.getIdentifier())
+					.setType(MenuAction.RUNELITE)
+					.setParam0(event.getActionParam0())
+					.setParam1(event.getActionParam1())
+					.onClick(
+							evt -> {
+								selectNavButton();
+								// Use the utility class to clean up the monster name.
+								String cleanedName = MonsterNameCleaner.clean(event.getTarget());
+								statsLookupPanel.lookupMonsterStats(cleanedName);
+							});
+		}
+	}
+
+
 	@Provides
 	StatsLookupConfig provideConfig(ConfigManager configManager) {
 		return configManager.getConfig(StatsLookupConfig.class);
+	}
+	public void selectNavButton() {
+		SwingUtilities.invokeLater(
+				() -> {
+					clientToolbar.openPanel(navButton);
+				});
 	}
 }

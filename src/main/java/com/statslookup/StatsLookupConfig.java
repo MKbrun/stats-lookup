@@ -21,6 +21,17 @@ public interface StatsLookupConfig extends Config {
 
 	@ConfigItem(
 			position = 1,
+			keyName = "showStatsMenuOption",
+			name = "Show Stats Menu Option",
+			description = "Enable right-click 'Stats' option for NPCs"
+	)
+	default boolean showStatsMenuOption()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+			position = 2,
 			keyName = "showAvatar",
 			name = "Monster Image",
 			description = "Toggle to show or hide image of the monster"
