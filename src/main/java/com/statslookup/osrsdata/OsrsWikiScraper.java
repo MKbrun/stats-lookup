@@ -322,7 +322,7 @@ public class OsrsWikiScraper {
 
     public static void main(String[] args) {
         try {
-            String monsterName = "Zulrah";
+            String monsterName = "Gargoyle";
             System.out.println("Attempting to scrape info for: " + monsterName);
             OsrsWikiMonster monster = OsrsWikiScraper.scrapeMonsterInfo(monsterName);
 

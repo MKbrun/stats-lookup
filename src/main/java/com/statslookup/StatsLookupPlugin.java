@@ -14,12 +14,12 @@ import net.runelite.client.plugins.PluginDescriptor;
 
 @Slf4j
 @PluginDescriptor(name = "Example")
-public class ExamplePlugin extends Plugin {
+public class StatsLookupPlugin extends Plugin {
 	@Inject
 	private Client client;
 
 	@Inject
-	private ExampleConfig config;
+	private StatsLookupConfig config;
 
 	@Override
 	protected void startUp() throws Exception {
@@ -34,12 +34,12 @@ public class ExamplePlugin extends Plugin {
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged) {
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN) {
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says ", null);
 		}
 	}
 
 	@Provides
-	ExampleConfig provideConfig(ConfigManager configManager) {
-		return configManager.getConfig(ExampleConfig.class);
+	StatsLookupConfig provideConfig(ConfigManager configManager) {
+		return configManager.getConfig(StatsLookupConfig.class);
 	}
 }
