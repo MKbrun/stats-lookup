@@ -80,7 +80,6 @@ public class OsrsWikiMonster {
         return null;
     }
 
-
     public void setImage(String image) {
         this.image = image;
     }

@@ -6,10 +6,12 @@ import com.statslookup.osrsdata.OsrsWikiScraper;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.IconTextField;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
 
+@Slf4j
 public class StatsLookupPanel extends PluginPanel {
 
     private final IconTextField monsterSearchField = new IconTextField();
@@ -50,13 +52,17 @@ public class StatsLookupPanel extends PluginPanel {
 
     private void performSearch() {
         String monsterName = monsterSearchField.getText().trim();
+        log.debug("Performing search for monster: {}", monsterName);
         if (!monsterName.isEmpty()) {
             // Start a thread for scraping so the UI doesn't freeze
             new Thread(() -> {
                 try {
+                    log.debug("Starting scrape for monster: {}", monsterName);
                     OsrsWikiMonster monster = OsrsWikiScraper.scrapeMonsterInfo(monsterName);
+                    log.debug("Scrape successful for monster: {}", monsterName);
                     MonsterInfobox infobox = new MonsterInfobox(monster);
                     SwingUtilities.invokeLater(() -> {
+                        log.debug("Updating UI with monster info: {}", monsterName);
                         MonsterInfoboxPanel infoboxPanel = new MonsterInfoboxPanel();
                         infoboxPanel.setMonsterInfobox(infobox);
                         displayPanel.removeAll();
@@ -65,6 +71,7 @@ public class StatsLookupPanel extends PluginPanel {
                         displayPanel.repaint();
                     });
                 } catch (Exception ex) {
+                    log.error("Error during monster search: {}", ex.getMessage(), ex);
                     SwingUtilities.invokeLater(() -> {
                         displayPanel.removeAll();
                         displayPanel.add(new JLabel("Error: " + ex.getMessage()), BorderLayout.CENTER);
@@ -73,6 +80,8 @@ public class StatsLookupPanel extends PluginPanel {
                     });
                 }
             }).start();
+        } else {
+            log.debug("Monster name is empty, skipping search");
         }
     }
 
@@ -84,8 +93,24 @@ public class StatsLookupPanel extends PluginPanel {
     }
 
     public void lookupMonsterStats(String monsterName) {
-        monsterSearchField.setText(monsterName);
-        performSearch();
+        log.debug("Looking up stats for monster: {}", monsterName);
+        if (monsterName != null && !monsterName.isEmpty()) {
+            log.debug("Setting text in monsterSearchField: {}", monsterName);
+            try {
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        monsterSearchField.setText(monsterName);
+                        performSearch();
+                    } catch (AssertionError e) {
+                        log.error("AssertionError while setting text in monsterSearchField: {}", e.getMessage(), e);
+                    }
+                });
+            } catch (Exception e) {
+                log.error("Exception while setting text in monsterSearchField: {}", e.getMessage(), e);
+            }
+        } else {
+            log.error("Monster name is null or empty");
+        }
     }
 
 }

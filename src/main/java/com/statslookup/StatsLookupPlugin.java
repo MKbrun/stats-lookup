@@ -65,10 +65,10 @@ public class StatsLookupPlugin extends Plugin {
 	}
 
 	@Subscribe
-	public void onMenuEntryAdded(MenuEntryAdded event)
-	{
-		if (config.showStatsMenuOption() && event.getType() == MenuAction.NPC_SECOND_OPTION.getId() && event.getTarget() != null)
-		{
+	public void onMenuEntryAdded(MenuEntryAdded event) {
+		log.debug("Menu entry added: {}", event.getTarget());
+		if (config.showStatsMenuOption() && event.getType() == MenuAction.NPC_SECOND_OPTION.getId()
+				&& event.getTarget() != null) {
 			client.createMenuEntry(client.getMenuEntries().length)
 					.setOption(STATS_OPTION)
 					.setTarget(event.getTarget())
@@ -78,19 +78,21 @@ public class StatsLookupPlugin extends Plugin {
 					.setParam1(event.getActionParam1())
 					.onClick(
 							evt -> {
+								log.debug("Stats option clicked for: {}", event.getTarget());
 								selectNavButton();
 								// Use the utility class to clean up the monster name.
 								String cleanedName = MonsterNameCleaner.clean(event.getTarget());
+								log.debug("Cleaned monster name: {}", cleanedName);
 								statsLookupPanel.lookupMonsterStats(cleanedName);
 							});
 		}
 	}
 
-
 	@Provides
 	StatsLookupConfig provideConfig(ConfigManager configManager) {
 		return configManager.getConfig(StatsLookupConfig.class);
 	}
+
 	public void selectNavButton() {
 		SwingUtilities.invokeLater(
 				() -> {

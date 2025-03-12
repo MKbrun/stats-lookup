@@ -5,15 +5,18 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import okhttp3.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public class OsrsWikiScraper {
 
     private static final String BASE_URL = "https://oldschool.runescape.wiki/w/";
 
     // Scrape the wiki page for the given monster name
     public static OsrsWikiMonster scrapeMonsterInfo(String monsterName) throws IOException {
+        log.debug("Scraping info for monster: {}", monsterName);
         // Format the name to match the URL format
         String formattedName = formatMonsterName(monsterName);
 
@@ -27,6 +30,7 @@ public class OsrsWikiScraper {
         Response response = client.newCall(request).execute();
 
         if (!response.isSuccessful()) {
+            log.error("Failed to fetch page: {}", response.code());
             throw new IOException("Failed to fetch page: " + response.code());
         }
 
@@ -42,6 +46,7 @@ public class OsrsWikiScraper {
         Element infobox = doc.select(".infobox").first();
 
         if (infobox == null) {
+            log.error("Infobox not found for monster: {}", monsterName);
             throw new IOException("Infobox not found for monster: " + monsterName);
         }
 

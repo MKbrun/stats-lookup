@@ -10,6 +10,8 @@ public enum ListViewOption {
         value = newValue;
     }
 
-    public int getValue() { return value; }
+    public int getValue() {
+        return value;
+    }
 
 }
