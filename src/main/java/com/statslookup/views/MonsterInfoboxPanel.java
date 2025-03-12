@@ -1,27 +1,31 @@
 package com.statslookup.views;
 
-
-import com.statslookup.views.WrapLayout;
 import com.statslookup.models.MonsterInfobox;
 import com.statslookup.utils.Constants;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.net.URL;
 
 public class MonsterInfoboxPanel extends JPanel {
 
-    private final JLabel nameLabel = new JLabel();
-    // Container for the section panels
+    private final JLabel nameLabel = new JLabel("", SwingConstants.CENTER);
+    private final JLabel imageLabel = new JLabel("", SwingConstants.CENTER);
     private final JPanel sectionsPanel = new JPanel();
 
     public MonsterInfoboxPanel() {
         setLayout(new BorderLayout());
-        add(nameLabel, BorderLayout.NORTH);
 
-        // vertical BoxLayout for sectionsPanel
+        // Top Panel containing name and image
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(nameLabel);
+        topPanel.add(imageLabel);
+
+        add(topPanel, BorderLayout.NORTH);
+
         sectionsPanel.setLayout(new BoxLayout(sectionsPanel, BoxLayout.Y_AXIS));
         add(sectionsPanel, BorderLayout.CENTER);
     }
@@ -29,6 +33,9 @@ public class MonsterInfoboxPanel extends JPanel {
     public void setMonsterInfobox(MonsterInfobox infobox) {
         nameLabel.setText("Name: " + infobox.getCleanName());
         sectionsPanel.removeAll();
+
+        // Load Image
+        loadImageFromURL(infobox.getImage());
 
         // Combat Stats Section
         JPanel combatSection = createSectionPanel("Combat Stats");
@@ -38,27 +45,52 @@ public class MonsterInfoboxPanel extends JPanel {
                 createResizedIcon(Constants.attackIcon, 24, 24), "Attack", infobox.getAttack()));
         combatSection.add(createStatEntry(
                 createResizedIcon(Constants.strengthIcon, 24, 24), "Strength", infobox.getStrength()));
+        combatSection.add(createStatEntry(
+                createResizedIcon(Constants.defenceIcon, 24, 24), "Defence", infobox.getDef()));
+        combatSection.add(createStatEntry(
+                createResizedIcon(Constants.magicIcon, 24, 24), "Mage", infobox.getMage()));
+        combatSection.add(createStatEntry(
+                createResizedIcon(Constants.rangeIcon, 24, 24), "Range", infobox.getRange()));
 
 
         // Aggressive Stats Section
         JPanel aggressiveSection = createSectionPanel("Aggressive Stats");
+        aggressiveSection.add(createStatEntry(
+                createResizedIcon(Constants.attackIcon, 24, 24), "Attack", infobox.getAttbns()));
+        aggressiveSection.add(createStatEntry(
+                createResizedIcon(Constants.strengthIcon, 24, 24), "Strength", infobox.getStrbns()));
+        aggressiveSection.add(createStatEntry(
+                createResizedIcon(Constants.magicIcon, 24, 24), "Mage", infobox.getAmagic()));
+        aggressiveSection.add(createStatEntry(
+                createResizedIcon(Constants.magicIcon, 24, 24), "Magic Damage", infobox.getMbns()));
+        aggressiveSection.add(createStatEntry(
+                createResizedIcon(Constants.rangeIcon, 24, 24), "Range", infobox.getArange()));
+        aggressiveSection.add(createStatEntry(
+                createResizedIcon(Constants.rangeIcon, 24, 24), "Ranged Strength", infobox.getRngbns()));
 
 
         // Melee Defence Section
         JPanel meleeDefenceSection = createSectionPanel("Melee Defence");
+        meleeDefenceSection.add(createStatEntry(
+                createResizedIcon(Constants.attackIcon, 24, 24), "Stab", infobox.getDstab()));
+        meleeDefenceSection.add(createStatEntry(
+                createResizedIcon(Constants.attackIcon, 24, 24), "Slash", infobox.getDslash()));
+        meleeDefenceSection.add(createStatEntry(
+                createResizedIcon(Constants.attackIcon, 24, 24), "Crush", infobox.getDcrush()));
 
 
         // Magic Defence Section
         JPanel magicDefenceSection = createSectionPanel("Magic Defence");
-
+        magicDefenceSection.add(createStatEntry(
+                createResizedIcon(Constants.magicIcon, 24, 24), "Magic Defence", infobox.getDmagic()));
 
         // Ranged Defence Section
         JPanel rangedDefenceSection = createSectionPanel("Ranged Defence");
-        combatSection.add(createStatEntry(
+        rangedDefenceSection.add(createStatEntry(
                 createResizedIcon(Constants.lightIcon,24,28), "Light", infobox.getDlight()));
-        combatSection.add(createStatEntry(
+        rangedDefenceSection.add(createStatEntry(
                 createResizedIcon(Constants.standardIcon,24,28), "Standard", infobox.getDstandard()));
-        combatSection.add(createStatEntry(
+        rangedDefenceSection.add(createStatEntry(
                 createResizedIcon(Constants.heavyIcon,24,28), "Heavy", infobox.getDheavy()));
 
 
@@ -72,31 +104,39 @@ public class MonsterInfoboxPanel extends JPanel {
         revalidate();
         repaint();
     }
+    private void loadImageFromURL(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageLabel.setIcon(null);
+            return;
+        }
+
+        try {
+            URL url = new URL(imageUrl);
+            ImageIcon icon = new ImageIcon(url);
+            Image image = icon.getImage().getScaledInstance(128, 128, Image.SCALE_SMOOTH);
+            imageLabel.setIcon(new ImageIcon(image));
+        } catch (Exception e) {
+            System.err.println("Failed to load image: " + imageUrl);
+            imageLabel.setIcon(null);
+        }
+    }
+
     private JPanel createSectionPanel(String title) {
-        JPanel panel = new JPanel(new WrapLayout(FlowLayout.LEFT, 5, 5));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
         TitledBorder border = BorderFactory.createTitledBorder(title);
         panel.setBorder(border);
         return panel;
     }
 
-    /**
-     * Helper method to create a stat entry component.
-     * If icon is null, only text is shown.
-     */
     private JPanel createStatEntry(Icon icon, String statName, String statValue) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         if (icon != null) {
-            JLabel iconLabel = new JLabel(icon);
-            panel.add(iconLabel);
+            panel.add(new JLabel(icon));
         }
-        JLabel valueLabel = new JLabel(statName + ": " + statValue);
-        panel.add(valueLabel);
+        panel.add(new JLabel(statName + ": " + statValue));
         return panel;
     }
 
-    /**
-     * Helper method to create a resized ImageIcon from a BufferedImage.
-     */
     private ImageIcon createResizedIcon(BufferedImage image, int width, int height) {
         BufferedImage resized = net.runelite.client.util.ImageUtil.resizeImage(image, width, height);
         return new ImageIcon(resized);

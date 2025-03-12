@@ -50,7 +50,7 @@ public class OsrsWikiScraper {
 
         // Extract the data from the infobox and populate the Monster object
         monster.setName(monsterName);
-        monster.setImage(extractData(infobox, "image"));
+        monster.setImage(extractImage(infobox));
         monster.setRelease(extractData(infobox, "release"));
         monster.setUpdate(extractData(infobox, "update"));
         monster.setRemoval(extractData(infobox, "removal"));
@@ -108,6 +108,18 @@ public class OsrsWikiScraper {
     }
 
     // Helper function to extract data from the infobox
+    private static String extractImage(Element infobox) {
+        Element imgElement = infobox.select("img").first();
+        if (imgElement != null) {
+            String src = imgElement.attr("src");
+            if (!src.startsWith("http")) {
+                return "https://oldschool.runescape.wiki" + src;
+            }
+            return src;
+        }
+        return null;
+    }
+
     private static String extractData(Element infobox, String fieldName) {
         // Special handling for combat stats which are in a specific format
         if (fieldName.equals("hitpoints") || fieldName.equals("att") ||

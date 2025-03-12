@@ -71,8 +71,15 @@ public class OsrsWikiMonster {
     }
 
     public String getImage() {
-        return image;
+        if (image != null && !image.isEmpty()) {
+            if (!image.startsWith("http")) {
+                return "https://oldschool.runescape.wiki" + image;
+            }
+            return image;
+        }
+        return null;
     }
+
 
     public void setImage(String image) {
         this.image = image;
