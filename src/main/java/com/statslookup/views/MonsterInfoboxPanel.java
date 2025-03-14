@@ -2,6 +2,7 @@ package com.statslookup.views;
 
 import com.statslookup.models.MonsterInfobox;
 import com.statslookup.utils.Constants;
+import com.statslookup.StatsLookupConfig;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -14,8 +15,10 @@ public class MonsterInfoboxPanel extends JPanel {
         private final JLabel nameLabel = new JLabel("", SwingConstants.CENTER);
         private final JLabel imageLabel = new JLabel("", SwingConstants.CENTER);
         private final JPanel sectionsPanel = new JPanel(new GridBagLayout());
+        private final StatsLookupConfig config;
 
-        public MonsterInfoboxPanel() {
+        public MonsterInfoboxPanel(StatsLookupConfig config) {
+                this.config = config;
                 setLayout(new BorderLayout());
                 setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -32,9 +35,13 @@ public class MonsterInfoboxPanel extends JPanel {
 
                 topPanel.add(nameLabel);
                 topPanel.add(Box.createRigidArea(new Dimension(0, 8)));
-                topPanel.add(imageLabel);
-                topPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
+                // Only add the image if enabled in config
+                if (config.showAvatar()) {
+                        topPanel.add(imageLabel);
+                }
+
+                topPanel.add(Box.createRigidArea(new Dimension(0, 15)));
                 add(topPanel, BorderLayout.NORTH);
 
                 JScrollPane scrollPane = new JScrollPane(sectionsPanel);
@@ -51,44 +58,58 @@ public class MonsterInfoboxPanel extends JPanel {
                 nameLabel.setText("<html><b>" + infobox.getCleanName() + "</b></html>");
                 sectionsPanel.removeAll();
                 sectionsPanel.setOpaque(false);
+                System.out.println("Setting monster info: " + infobox.getCleanName());
+
 
                 // Load Image (Now centered and without background)
-                loadImageFromURL(infobox.getImage());
+                if (config.showAvatar()) {
+                        loadImageFromURL(infobox.getImage());
+                }
 
-                // Add sections with proper spacing
-                addSection("Combat Stats", new Object[][]{
-                        {"HP", infobox.getHitpoints(), Constants.hitpointsIcon},
-                        {"Attack", infobox.getAttack(), Constants.attackIcon},
-                        {"Strength", infobox.getStrength(), Constants.strengthIcon},
-                        {"Defence", infobox.getDef(), Constants.defenceIcon},
-                        {"Mage", infobox.getMage(), Constants.magicIcon},
-                        {"Range", infobox.getRange(), Constants.rangeIcon}
-                });
+                // Add sections based on config settings
+                if (config.showCombatStats()) {
+                        addSection("Combat Stats", new Object[][]{
+                                {"HP", infobox.getHitpoints(), Constants.hitpointsIcon},
+                                {"Attack", infobox.getAttack(), Constants.attackIcon},
+                                {"Strength", infobox.getStrength(), Constants.strengthIcon},
+                                {"Defence", infobox.getDef(), Constants.defenceIcon},
+                                {"Mage", infobox.getMage(), Constants.magicIcon},
+                                {"Range", infobox.getRange(), Constants.rangeIcon}
+                        });
+                }
 
-                addSection("Aggressive Stats", new Object[][]{
-                        {"Attack", infobox.getAttbns(), Constants.attackIcon},
-                        {"Strength", infobox.getStrbns(), Constants.strengthIcon},
-                        {"Mage", infobox.getAmagic(), Constants.magicIcon},
-                        {"Magic Damage", infobox.getMbns(), Constants.magicIcon},
-                        {"Range", infobox.getArange(), Constants.rangeIcon},
-                        {"Ranged Strength", infobox.getRngbns(), Constants.rangeIcon}
-                });
+                if (config.showAggressiveStats()) {
+                        addSection("Aggressive Stats", new Object[][]{
+                                {"Attack", infobox.getAttbns(), Constants.attackIcon},
+                                {"Strength", infobox.getStrbns(), Constants.strengthIcon},
+                                {"Mage", infobox.getAmagic(), Constants.magicIcon},
+                                {"Magic Damage", infobox.getMbns(), Constants.magicIcon},
+                                {"Range", infobox.getArange(), Constants.rangeIcon},
+                                {"Ranged Strength", infobox.getRngbns(), Constants.rangeIcon}
+                        });
+                }
 
-                addSection("Melee Defence", new Object[][]{
-                        {"Stab", infobox.getDstab(), Constants.attackIcon},
-                        {"Slash", infobox.getDslash(), Constants.attackIcon},
-                        {"Crush", infobox.getDcrush(), Constants.attackIcon}
-                });
+                if (config.showMeleeDefence()) {
+                        addSection("Melee Defence", new Object[][]{
+                                {"Stab", infobox.getDstab(), Constants.attackIcon},
+                                {"Slash", infobox.getDslash(), Constants.attackIcon},
+                                {"Crush", infobox.getDcrush(), Constants.attackIcon}
+                        });
+                }
 
-                addSection("Magic Defence", new Object[][]{
-                        {"Magic Defence", infobox.getDmagic(), Constants.magicIcon}
-                });
+                if (config.showMagicDefence()) {
+                        addSection("Magic Defence", new Object[][]{
+                                {"Magic Defence", infobox.getDmagic(), Constants.magicIcon}
+                        });
+                }
 
-                addSection("Ranged Defence", new Object[][]{
-                        {"Light", infobox.getDlight(), Constants.lightIcon},
-                        {"Standard", infobox.getDstandard(), Constants.standardIcon},
-                        {"Heavy", infobox.getDheavy(), Constants.heavyIcon}
-                });
+                if (config.showRangedDefence()) {
+                        addSection("Ranged Defence", new Object[][]{
+                                {"Light", infobox.getDlight(), Constants.lightIcon},
+                                {"Standard", infobox.getDstandard(), Constants.standardIcon},
+                                {"Heavy", infobox.getDheavy(), Constants.heavyIcon}
+                        });
+                }
 
                 sectionsPanel.revalidate();
                 sectionsPanel.repaint();

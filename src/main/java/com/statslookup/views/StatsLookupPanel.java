@@ -1,5 +1,6 @@
 package com.statslookup.views;
 
+import com.statslookup.StatsLookupConfig;
 import com.statslookup.models.MonsterInfobox;
 import com.statslookup.osrsdata.OsrsWikiMonster;
 import com.statslookup.osrsdata.OsrsWikiScraper;
@@ -7,6 +8,7 @@ import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.IconTextField;
 import lombok.extern.slf4j.Slf4j;
+import javax.inject.Inject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,9 +18,15 @@ public class StatsLookupPanel extends PluginPanel {
 
     private final IconTextField monsterSearchField = new IconTextField();
     // Panel to display monster info
+
+    private final StatsLookupConfig config;
+
     private final JPanel displayPanel = new JPanel(new BorderLayout());
 
-    public StatsLookupPanel() {
+
+
+    public StatsLookupPanel(StatsLookupConfig config) {
+        this.config = config;
         setLayout(new BorderLayout());
 
         buildSearchField();
@@ -63,7 +71,7 @@ public class StatsLookupPanel extends PluginPanel {
                     MonsterInfobox infobox = new MonsterInfobox(monster);
                     SwingUtilities.invokeLater(() -> {
                         log.debug("Updating UI with monster info: {}", monsterName);
-                        MonsterInfoboxPanel infoboxPanel = new MonsterInfoboxPanel();
+                        MonsterInfoboxPanel infoboxPanel = new MonsterInfoboxPanel(config);
                         infoboxPanel.setMonsterInfobox(infobox);
                         displayPanel.removeAll();
                         displayPanel.add(infoboxPanel, BorderLayout.CENTER);

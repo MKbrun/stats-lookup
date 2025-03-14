@@ -25,6 +25,7 @@ public class StatsLookupPlugin extends Plugin {
 	private Client client;
 	@Inject
 	private StatsLookupConfig config;
+
 	@Inject
 	private ClientToolbar clientToolbar;
 
@@ -34,7 +35,8 @@ public class StatsLookupPlugin extends Plugin {
 
 	@Override
 	protected void startUp() throws Exception {
-		statsLookupPanel = new StatsLookupPanel();
+		statsLookupPanel = new StatsLookupPanel(config);
+
 
 		if (Constants.NAV_BUTTON == null) {
 			log.error("Failed");
