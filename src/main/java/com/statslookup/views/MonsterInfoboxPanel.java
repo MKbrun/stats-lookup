@@ -13,94 +13,85 @@ public class MonsterInfoboxPanel extends JPanel {
 
         private final JLabel nameLabel = new JLabel("", SwingConstants.CENTER);
         private final JLabel imageLabel = new JLabel("", SwingConstants.CENTER);
-        private final JPanel sectionsPanel = new JPanel();
+        private final JPanel sectionsPanel = new JPanel(new GridBagLayout());
 
         public MonsterInfoboxPanel() {
                 setLayout(new BorderLayout());
-                setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add margin
+                setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-                // Top Panel containing name and image
+                // Top Panel (Contains Name and Image)
                 JPanel topPanel = new JPanel();
                 topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+                topPanel.setOpaque(false);
+
+                nameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+                nameLabel.setForeground(Color.WHITE);
+                nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+                imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
                 topPanel.add(nameLabel);
+                topPanel.add(Box.createRigidArea(new Dimension(0, 8)));
                 topPanel.add(imageLabel);
+                topPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
                 add(topPanel, BorderLayout.NORTH);
 
-                sectionsPanel.setLayout(new BoxLayout(sectionsPanel, BoxLayout.Y_AXIS));
-                add(sectionsPanel, BorderLayout.CENTER);
+                JScrollPane scrollPane = new JScrollPane(sectionsPanel);
+                scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+                scrollPane.setBorder(null);
+                scrollPane.getViewport().setOpaque(false);
+                scrollPane.setOpaque(false);
+
+                add(scrollPane, BorderLayout.CENTER);
         }
 
         public void setMonsterInfobox(MonsterInfobox infobox) {
-                nameLabel.setText("Name: " + infobox.getCleanName());
+                nameLabel.setText("<html><b>" + infobox.getCleanName() + "</b></html>");
                 sectionsPanel.removeAll();
+                sectionsPanel.setOpaque(false);
 
-                // Load Image
+                // Load Image (Now centered and without background)
                 loadImageFromURL(infobox.getImage());
 
-                // Combat Stats Section
-                JPanel combatSection = createSectionPanel("Combat Stats");
-                combatSection.add(createStatEntry(
-                                createResizedIcon(Constants.hitpointsIcon, 24, 24), "HP", infobox.getHitpoints()));
-                combatSection.add(createStatEntry(
-                                createResizedIcon(Constants.attackIcon, 24, 24), "Attack", infobox.getAttack()));
-                combatSection.add(createStatEntry(
-                                createResizedIcon(Constants.strengthIcon, 24, 24), "Strength", infobox.getStrength()));
-                combatSection.add(createStatEntry(
-                                createResizedIcon(Constants.defenceIcon, 24, 24), "Defence", infobox.getDef()));
-                combatSection.add(createStatEntry(
-                                createResizedIcon(Constants.magicIcon, 24, 24), "Mage", infobox.getMage()));
-                combatSection.add(createStatEntry(
-                                createResizedIcon(Constants.rangeIcon, 24, 24), "Range", infobox.getRange()));
+                // Add sections with proper spacing
+                addSection("Combat Stats", new Object[][]{
+                        {"HP", infobox.getHitpoints(), Constants.hitpointsIcon},
+                        {"Attack", infobox.getAttack(), Constants.attackIcon},
+                        {"Strength", infobox.getStrength(), Constants.strengthIcon},
+                        {"Defence", infobox.getDef(), Constants.defenceIcon},
+                        {"Mage", infobox.getMage(), Constants.magicIcon},
+                        {"Range", infobox.getRange(), Constants.rangeIcon}
+                });
 
-                // Aggressive Stats Section
-                JPanel aggressiveSection = createSectionPanel("Aggressive Stats");
-                aggressiveSection.add(createStatEntry(
-                                createResizedIcon(Constants.attackIcon, 16, 16), "Attack", infobox.getAttbns()));
-                aggressiveSection.add(createStatEntry(
-                                createResizedIcon(Constants.strengthIcon, 16, 16), "Strength", infobox.getStrbns()));
-                aggressiveSection.add(createStatEntry(
-                                createResizedIcon(Constants.magicIcon, 16, 16), "Mage", infobox.getAmagic()));
-                aggressiveSection.add(createStatEntry(
-                                createResizedIcon(Constants.magicIcon, 16, 16), "Magic Damage", infobox.getMbns()));
-                aggressiveSection.add(createStatEntry(
-                                createResizedIcon(Constants.rangeIcon, 16, 16), "Range", infobox.getArange()));
-                aggressiveSection.add(createStatEntry(
-                                createResizedIcon(Constants.rangeIcon, 16, 16), "Ranged Strength",
-                                infobox.getRngbns()));
+                addSection("Aggressive Stats", new Object[][]{
+                        {"Attack", infobox.getAttbns(), Constants.attackIcon},
+                        {"Strength", infobox.getStrbns(), Constants.strengthIcon},
+                        {"Mage", infobox.getAmagic(), Constants.magicIcon},
+                        {"Magic Damage", infobox.getMbns(), Constants.magicIcon},
+                        {"Range", infobox.getArange(), Constants.rangeIcon},
+                        {"Ranged Strength", infobox.getRngbns(), Constants.rangeIcon}
+                });
 
-                // Melee Defence Section
-                JPanel meleeDefenceSection = createSectionPanel("Melee Defence");
-                meleeDefenceSection.add(createStatEntry(
-                                createResizedIcon(Constants.attackIcon, 24, 24), "Stab", infobox.getDstab()));
-                meleeDefenceSection.add(createStatEntry(
-                                createResizedIcon(Constants.attackIcon, 24, 24), "Slash", infobox.getDslash()));
-                meleeDefenceSection.add(createStatEntry(
-                                createResizedIcon(Constants.attackIcon, 24, 24), "Crush", infobox.getDcrush()));
+                addSection("Melee Defence", new Object[][]{
+                        {"Stab", infobox.getDstab(), Constants.attackIcon},
+                        {"Slash", infobox.getDslash(), Constants.attackIcon},
+                        {"Crush", infobox.getDcrush(), Constants.attackIcon}
+                });
 
-                // Magic Defence Section
-                JPanel magicDefenceSection = createSectionPanel("Magic Defence");
-                magicDefenceSection.add(createStatEntry(
-                                createResizedIcon(Constants.magicIcon, 24, 24), "Magic Defence", infobox.getDmagic()));
+                addSection("Magic Defence", new Object[][]{
+                        {"Magic Defence", infobox.getDmagic(), Constants.magicIcon}
+                });
 
-                // Ranged Defence Section
-                JPanel rangedDefenceSection = createSectionPanel("Ranged Defence");
-                rangedDefenceSection.add(createStatEntry(
-                                createResizedIcon(Constants.lightIcon, 24, 24), "Light", infobox.getDlight()));
-                rangedDefenceSection.add(createStatEntry(
-                                createResizedIcon(Constants.standardIcon, 24, 24), "Standard", infobox.getDstandard()));
-                rangedDefenceSection.add(createStatEntry(
-                                createResizedIcon(Constants.heavyIcon, 24, 24), "Heavy", infobox.getDheavy()));
+                addSection("Ranged Defence", new Object[][]{
+                        {"Light", infobox.getDlight(), Constants.lightIcon},
+                        {"Standard", infobox.getDstandard(), Constants.standardIcon},
+                        {"Heavy", infobox.getDheavy(), Constants.heavyIcon}
+                });
 
-                // Add the sections to the main container
-                sectionsPanel.add(combatSection);
-                sectionsPanel.add(aggressiveSection);
-                sectionsPanel.add(meleeDefenceSection);
-                sectionsPanel.add(magicDefenceSection);
-                sectionsPanel.add(rangedDefenceSection);
-
-                revalidate();
-                repaint();
+                sectionsPanel.revalidate();
+                sectionsPanel.repaint();
         }
 
         private void loadImageFromURL(String imageUrl) {
@@ -108,7 +99,6 @@ public class MonsterInfoboxPanel extends JPanel {
                         imageLabel.setIcon(null);
                         return;
                 }
-
                 try {
                         URL url = new URL(imageUrl);
                         ImageIcon icon = new ImageIcon(url);
@@ -120,22 +110,38 @@ public class MonsterInfoboxPanel extends JPanel {
                 }
         }
 
-        private JPanel createSectionPanel(String title) {
-                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5)); // Center align
-                TitledBorder border = BorderFactory.createTitledBorder(title);
-                border.setTitleJustification(TitledBorder.CENTER); // Center title
-                panel.setBorder(border);
-                panel.setAlignmentX(Component.CENTER_ALIGNMENT); // Center align
-                return panel;
+        private void addSection(String title, Object[][] stats) {
+                JPanel sectionPanel = new JPanel(new GridLayout(0, 3, 10, 5));
+                sectionPanel.setBorder(BorderFactory.createTitledBorder(
+                        BorderFactory.createLineBorder(new Color(80, 80, 80), 1, true),
+                        title, TitledBorder.CENTER, TitledBorder.TOP,
+                        new Font("Arial", Font.PLAIN, 12), Color.WHITE));
+                sectionPanel.setOpaque(false);
+                sectionPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+                for (Object[] stat : stats) {
+                        BufferedImage iconImage = (BufferedImage) stat[2];
+                        sectionPanel.add(createStatEntry(createResizedIcon(iconImage, 16, 16), (String) stat[0], (String) stat[1]));
+                }
+
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.fill = GridBagConstraints.HORIZONTAL;
+                gbc.weightx = 1.0;
+                gbc.gridx = 0;
+                gbc.gridy = sectionsPanel.getComponentCount();
+                gbc.insets = new Insets(15, 0, 15, 0);
+
+                sectionsPanel.add(sectionPanel, gbc);
         }
 
         private JPanel createStatEntry(Icon icon, String statName, String statValue) {
-                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0)); // Center align
-                panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Add padding
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
+                panel.setOpaque(false);
                 if (icon != null) {
                         panel.add(new JLabel(icon));
                 }
-                panel.add(new JLabel(statName + ": " + statValue));
+                JLabel statLabel = new JLabel("<html><b style='color:white; font-weight:400'>" + statValue + "</b></html>");
+                panel.add(statLabel);
                 return panel;
         }
 
